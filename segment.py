@@ -16,7 +16,7 @@ def segment(th, min_distance=10, topology=None):
     elif callable(topology):
         topology = topology(dtr)
         
-    m = peak_local_max(a, min_distance, indices=False)
+    m = peak_local_max(-topology, min_distance, indices=False)
     m_lab = ndi.label(m)[0]
     wsh = watershed(topology, m_lab, mask=th)
     return wsh

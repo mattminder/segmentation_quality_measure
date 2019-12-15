@@ -47,8 +47,23 @@ def nb_fusions(cc, truth):
     Counts number of cells that were fused.
     """
     true_cells = set(np.unique(truth))
-    pred_cells = set(list(cc.keys()))
+    pred_cells = set(list(cc.values()))
     return len(true_cells - pred_cells)
+
+def nb_artefacts(cc):
+    """
+    Number of predicted cells that are really background.
+    """
+    valarr = np.array(list(cc.values()))
+    keyarr = np.array(list(cc.keys()))
+    return (valarr[keyarr>0]==0).sum()
+
+def nb_false_negatives(truth, pred):
+    """
+    Number of cells of mask that were detected as background in the prediction.
+    """
+    rev_cc = cell_correspondance_frame(pred, truth)
+    return nb_artefacts(rev_cc)
 
 def over_undershoot(truth, pred, cc, look_at):
     """
@@ -139,6 +154,8 @@ def quality_measures(truth, pred):
     # Result Calculation
     res["Number Fusions"] = nb_fusions(cc, truth)
     res["Number Splits"] = nb_splits(cc)
+    res["Nb False Positives"] = nb_artefacts(cc)
+    res["Nb False Negatives"] = nb_false_negatives(truth, pred)
     res["Average Overshoot"], res["Average Undershoot"] = over_undershoot(truth, pred, cc, look_at)
     res["Av. True Area"] = average_true_area(truth, cc, look_at)
     res["Av. Pred Area"] = average_pred_area(pred, cc, look_at)
